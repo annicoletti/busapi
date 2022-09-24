@@ -19,6 +19,9 @@ public class AvmFacadeServiceBean implements AvmFacadeService, AvmExecuteFacade 
 	@Autowired
 	private AvmIntegration currentWheaterService;
 
+	@Autowired
+	private AvmIntegration busMockDelayService;
+
 	@Override
 	public AvmResponseTO findCity(Map<String, Object> request) {
 		return process(findCityService, request);
@@ -27,6 +30,11 @@ public class AvmFacadeServiceBean implements AvmFacadeService, AvmExecuteFacade 
 	@Override
 	public AvmResponseTO currentWheater(Map<String, Object> request) {
 		return process(currentWheaterService, request);
+	}
+
+	@Override
+	public AvmResponseTO delay(Map<String, Object> request) {
+		return process(busMockDelayService, request);
 	}
 
 }

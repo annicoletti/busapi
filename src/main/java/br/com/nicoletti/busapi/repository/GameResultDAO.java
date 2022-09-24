@@ -1,5 +1,6 @@
-package br.com.nicoletti.busapi.beans.repository;
+package br.com.nicoletti.busapi.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,6 +18,16 @@ public interface GameResultDAO extends JpaRepository<GameResultVO, Long> {
 	List<GameResultVO> findAllByGameType(String gameType);
 
 	GameResultVO findByGameTypeAndContest(String tipoJogo, Integer numero);
+
+	List<GameResultVO> findByDrawDateBetweenAndGameType(Date init, Date end, String gameType);
+
+	// @Query("SELECT g FROM GameResultVO g WHERE g.drawDate >= :init and g.drawDate
+	// <= :end and g.gameType = :gameType")
+//	List<GameResultVO> findByRangeDateAndGameType(@Param("init") Date init, @Param("end") Date end,
+//			@Param("gameType") String gameType);
+
+//	@Query("SELECT g FROM GameResultVO g WHERE g.drawDate >= ?1 and g.drawDate <= ?2 and g.gameType = ?3")
+//	List<GameResultVO> findByRangeDateAndGameType(Date init, Date end, String gameType);
 
 	// List<GameResultVO> findByGameTypeAndContest(String tipoJogo, Integer numero);
 

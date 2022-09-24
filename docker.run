@@ -1,0 +1,1 @@
+ docker run -p 80:8088 --name busapi -e DS_URL=jdbc:postgresql://localhost:5432/db-busapi -e DS_USERNAME=postgres -e DS_PASSWORD=123456 -e DB_SERVER=localhost -e DB_PORT=5432 -e DB_NAME=db-busapi -e DB_SCHEMA=master -e DB_USER=postgres -e DB_PASSWORD=123456 busapi:v1

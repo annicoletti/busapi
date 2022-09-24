@@ -3,10 +3,13 @@ package br.com.nicoletti.busapi.beans.lottery.vo;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
+import org.springframework.beans.factory.annotation.Value;
 
 @Entity(name = "error_case")
 public class ErrorCaseVO implements Serializable {
@@ -23,6 +26,7 @@ public class ErrorCaseVO implements Serializable {
 
 	private Date lastAttemp;
 
+	@Column(columnDefinition = "text")
 	private String detail;
 
 	public Long getId() {

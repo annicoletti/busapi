@@ -8,12 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -21,7 +24,9 @@ import org.springframework.stereotype.Service;
 import br.com.nicoletti.busapi.beans.lottery.enums.LotteryTypeGame;
 import br.com.nicoletti.busapi.beans.lottery.to.ApportionmentPrizeOnlineTO;
 import br.com.nicoletti.busapi.beans.lottery.to.ApportionmentPrizeTO;
+import br.com.nicoletti.busapi.beans.lottery.to.CalculateTableTO;
 import br.com.nicoletti.busapi.beans.lottery.to.CalculatedResultTO;
+import br.com.nicoletti.busapi.beans.lottery.to.ChartTO;
 import br.com.nicoletti.busapi.beans.lottery.to.GameResultCheckerTO;
 import br.com.nicoletti.busapi.beans.lottery.to.GameResultOnlineTO;
 import br.com.nicoletti.busapi.beans.lottery.to.GameResultReportTO;
@@ -33,21 +38,21 @@ import br.com.nicoletti.busapi.beans.lottery.vo.ApportionmentPrizeVO;
 import br.com.nicoletti.busapi.beans.lottery.vo.BetVO;
 import br.com.nicoletti.busapi.beans.lottery.vo.GameResultVO;
 import br.com.nicoletti.busapi.beans.lottery.vo.RaffleNumberVO;
-import br.com.nicoletti.busapi.beans.repository.BetDAO;
-import br.com.nicoletti.busapi.beans.repository.GameResultDAO;
 import br.com.nicoletti.busapi.beans.to.ResponseFailedTO;
 import br.com.nicoletti.busapi.beans.to.ResponseSuccessTO;
 import br.com.nicoletti.busapi.beans.to.ResponseTO;
 import br.com.nicoletti.busapi.exception.BusException;
+import br.com.nicoletti.busapi.repository.BetDAO;
+import br.com.nicoletti.busapi.repository.GameResultDAO;
 import br.com.nicoletti.busapi.service.api.LoteriasService;
 import br.com.nicoletti.busapi.service.api.RestService;
 import br.com.nicoletti.busapi.utils.BusExceptions;
 import br.com.nicoletti.busapi.utils.LoteriasConstants;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 public class LotteriesServiceBean implements LoteriasService {
+
+	private final Logger log = LoggerFactory.getLogger(LotteriesServiceBean.class);
 
 	private static SimpleDateFormat SDF = new SimpleDateFormat("dd/MM/yyyy");
 
@@ -142,8 +147,8 @@ public class LotteriesServiceBean implements LoteriasService {
 			});
 
 			String[] cityState = splitValueFromString(jsonObject.getString("nomeMunicipioUFSorteio"));
-			String municipio = cityState.length >= 1 && !cityState[0].isBlank() ? cityState[0] : "";
-			String uf = cityState.length >= 2 && !cityState[1].isBlank() ? cityState[1] : "";
+			String municipio = cityState.length >= 1 && !cityState[0].isEmpty() ? cityState[0] : "";
+			String uf = cityState.length >= 2 && !cityState[1].isEmpty() ? cityState[1] : "";
 
 			LotteryTypeGame gameType = LotteryTypeGame.toEnum(jsonObject.getString("tipoJogo"));
 
@@ -183,7 +188,7 @@ public class LotteriesServiceBean implements LoteriasService {
 	private String[] splitValueFromString(String string) {
 		String[] split = string.split(",");
 		for (String s : split) {
-			s.toLowerCase().strip();
+			s.toLowerCase().trim();
 		}
 		return split;
 	}
@@ -274,6 +279,14 @@ public class LotteriesServiceBean implements LoteriasService {
 
 		try {
 
+			if (tipoJogo == null || tipoJogo.trim().isEmpty()) {
+				throw new BusException(BusExceptions.LOTTERY_SERVICE_ERROR_TYPE_GAME_IS_REQUIRED);
+			}
+
+			if (numero == null || numero <= 0) {
+				throw new BusException(BusExceptions.LOTTERY_SERVICE_ERROR_NUMBER_GAME_IS_REQUIRED);
+			}
+
 			GameResultVO result = gameResultDAO.findByGameTypeAndContest(tipoJogo, numero);
 
 			if (result == null) {
@@ -346,25 +359,15 @@ public class LotteriesServiceBean implements LoteriasService {
 	@Override
 	public String getUrl(String tipoJogo, Integer numeroSorteio) throws BusException {
 
-		String path = null;
 		LotteryTypeGame game = LotteryTypeGame.toEnum(tipoJogo);
+		String path = String.format(LoteriasConstants.PATH, game.name());
+		path = numeroSorteio != null ? path + numeroSorteio : path;
 
-		if (LotteryTypeGame.LOTOFACIL.equals(game)) {
-			path = LoteriasConstants.PATH_LOTOFACIL;
-
-		} else if (LotteryTypeGame.MEGASENA.equals(game)) {
-			path = LoteriasConstants.PATH_MEGASENA;
-
-		} else {
+		if (!LotteryTypeGame.LOTOFACIL.equals(game) && !LotteryTypeGame.MEGASENA.equals(game)) {
 			throw new BusException(BusExceptions.LOTTERY_SERVICE_GAME_TYPE_NOT_FOUND, new String[] { tipoJogo });
 		}
 
-		if (numeroSorteio != null) {
-			path = String.format(path.concat(LoteriasConstants.FILTER), numeroSorteio);
-		}
-
 		String url = LoteriasConstants.SERVER.concat(path);
-
 		return url;
 	}
 
@@ -399,8 +402,7 @@ public class LotteriesServiceBean implements LoteriasService {
 
 		try {
 
-			LotteryTypeGame gameType = LotteryTypeGame
-					.toEnum((String) params.get(LoteriasConstants.REQUEST_PARAMS_GAME_TYPE));
+			LotteryTypeGame gameType = LotteryTypeGame.toEnum(params.get(LoteriasConstants.REQUEST_PARAMS_GAME_TYPE));
 			Integer playWith = (Integer) params.get(LoteriasConstants.REQUEST_PARAMS_PLAY_WITH);
 			Integer numbersToGame = playWith != null && playWith > 0 ? playWith : gameType.getStandardQuantity();
 			String startsIn = (String) params.get(LoteriasConstants.REQUEST_PARAMS_STARTS_IN);
@@ -599,7 +601,7 @@ public class LotteriesServiceBean implements LoteriasService {
 					numeros.add(rand);
 				}
 
-				params.put(LoteriasConstants.REQUEST_PARAMS_NUMBERS_FOR_CHECK, List.copyOf(numeros));
+				params.put(LoteriasConstants.REQUEST_PARAMS_NUMBERS_FOR_CHECK, numeros);
 				boolean isValid = Boolean.TRUE;
 				List<GameResultCheckerTO> resultChecker = resultChecker(params);
 				for (GameResultCheckerTO to : resultChecker) {
@@ -633,11 +635,8 @@ public class LotteriesServiceBean implements LoteriasService {
 	public ResponseTO doBet(Map<String, Object> params) {
 
 		try {
-			LotteryTypeGame gameType = LotteryTypeGame
-					.toEnum((String) params.get(LoteriasConstants.REQUEST_PARAMS_GAME_TYPE));
-
+			LotteryTypeGame gameType = LotteryTypeGame.toEnum(params.get(LoteriasConstants.REQUEST_PARAMS_GAME_TYPE));
 			boolean random = (boolean) params.getOrDefault(LoteriasConstants.REQUEST_PARAMS_GAME_RANDOM, true);
-
 			List<Set<Integer>> data = null;
 
 			if (random) {
@@ -673,6 +672,67 @@ public class LotteriesServiceBean implements LoteriasService {
 		vo.setId(null);
 
 		return vo;
+	}
+
+	@Override
+	public ResponseTO getChart(String game) {
+
+		ResponseSuccessTO<ChartTO> out = new ResponseSuccessTO<>();
+		try {
+
+			ChartTO dataFromMonth = statisticsService.getFullChartData(LotteryTypeGame.toEnum(game));
+			toCSV(dataFromMonth);
+
+			out.setData(dataFromMonth);
+
+		} catch (BusException e) {
+			e.printStackTrace();
+		}
+
+		return out;
+	}
+
+	private String toCSV(ChartTO chart) {
+
+		String csv = "";
+
+		StringJoiner sj = new StringJoiner(";", "", "\n");
+		String[] column = chart.getColumn();
+		for (String s : column) {
+			sj.add(s);
+		}
+		csv = sj.toString();
+
+		List<String[]> rows = chart.getRows();
+		for (String[] r : rows) {
+			sj = new StringJoiner(",", "", "\n");
+			for (String n : r) {
+				sj.add(n);
+			}
+			csv = csv += sj.toString();
+		}
+
+		System.err.println("csv = " + csv);
+
+		return csv;
+
+	}
+
+	@Override
+	public ResponseTO getRatioCoefficient(String game) {
+		ResponseSuccessTO<List<CalculateTableTO>> out = new ResponseSuccessTO<>();
+		try {
+
+			List<CalculateTableTO> ratioCoefficient = statisticsService
+					.getRatioCoefficient(LotteryTypeGame.toEnum(game));
+
+			out.setData(ratioCoefficient);
+
+		} catch (BusException e) {
+			e.printStackTrace();
+		}
+
+		return out;
 	}
 
 }

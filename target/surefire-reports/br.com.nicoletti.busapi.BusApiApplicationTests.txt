@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: br.com.nicoletti.busapi.BusApiApplicationTests
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.379 s - in br.com.nicoletti.busapi.BusApiApplicationTests

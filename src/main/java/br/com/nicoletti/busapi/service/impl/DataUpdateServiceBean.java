@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,20 +18,20 @@ import br.com.nicoletti.busapi.beans.lottery.to.RaffleTO;
 import br.com.nicoletti.busapi.beans.lottery.vo.BetVO;
 import br.com.nicoletti.busapi.beans.lottery.vo.ErrorCaseVO;
 import br.com.nicoletti.busapi.beans.lottery.vo.GameResultVO;
-import br.com.nicoletti.busapi.beans.repository.BetDAO;
-import br.com.nicoletti.busapi.beans.repository.ErrorCaseDAO;
-import br.com.nicoletti.busapi.beans.repository.GameResultDAO;
 import br.com.nicoletti.busapi.beans.to.ResponseSuccessTO;
 import br.com.nicoletti.busapi.beans.to.ResponseTO;
 import br.com.nicoletti.busapi.exception.BusException;
+import br.com.nicoletti.busapi.repository.BetDAO;
+import br.com.nicoletti.busapi.repository.ErrorCaseDAO;
+import br.com.nicoletti.busapi.repository.GameResultDAO;
 import br.com.nicoletti.busapi.service.api.LoteriasService;
 import br.com.nicoletti.busapi.service.api.RestService;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @EnableScheduling
 public class DataUpdateServiceBean {
+
+	private final Logger log = LoggerFactory.getLogger(DataUpdateServiceBean.class);
 
 	private static final int HOUR_IN_MILLIS = 3600000;
 
@@ -108,7 +110,8 @@ public class DataUpdateServiceBean {
 	private void refreshLottery(LotteryTypeGame lotteryTypeGame) throws BusException {
 
 		String path = loteriasService.getUrl(lotteryTypeGame.getName(), null);
-		String lastResult = restService.doSimpleGetToLotteries(path);
+//		String lastResult = restService.doSimpleGetToLotteries(path);
+		String lastResult = restService.doSimpleGet(path);
 
 		JSONObject jsonLastResult = new JSONObject(lastResult);
 		Integer lastNumber = jsonLastResult.getInt("numero");

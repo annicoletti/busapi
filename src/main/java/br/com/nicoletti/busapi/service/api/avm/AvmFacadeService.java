@@ -10,4 +10,6 @@ public interface AvmFacadeService {
 
 	AvmResponseTO currentWheater(Map<String, Object> request);
 
+	AvmResponseTO delay(Map<String, Object> request);
+
 }

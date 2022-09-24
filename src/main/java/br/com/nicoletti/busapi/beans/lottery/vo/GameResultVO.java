@@ -10,6 +10,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity(name = "result_game")
 public class GameResultVO implements Serializable {
@@ -24,6 +26,8 @@ public class GameResultVO implements Serializable {
 
 	private String gameType;
 
+//	@Temporal(TemporalType.DATE)
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date drawDate;
 
 	private Integer previousContestNumber;

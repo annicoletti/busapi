@@ -5,13 +5,32 @@ import java.util.Map;
 import br.com.nicoletti.busapi.beans.lottery.to.GameResultTO;
 import br.com.nicoletti.busapi.beans.lottery.to.RaffleTO;
 import br.com.nicoletti.busapi.beans.lottery.vo.GameResultVO;
+import br.com.nicoletti.busapi.beans.to.ResponseSuccessTO;
 import br.com.nicoletti.busapi.beans.to.ResponseTO;
 import br.com.nicoletti.busapi.exception.BusException;
 
 public interface LoteriasService {
 
-	ResponseTO getSingleResultOnline(RaffleTO sorteioTO);
+	/**
+	 * Retorna o resultado completo e detalhado do concurso escolhido. Se o numero
+	 * do sorteio não for informado será retornado o resultado mais recente.
+	 * 
+	 * Não é utilizado nenhuma cache, consulta é totalmente online.
+	 * 
+	 * @param {@link RaffleTO}
+	 * @return {@link ResponseSuccessTO }
+	 */
+	ResponseTO getSingleResultOnline(RaffleTO raffleTO);
 
+	/**
+	 * Retorna o resultado completo e detalhado do concurso escolhido. É obrigatório
+	 * o numero do sorteio.
+	 * 
+	 * Reultado é baseado em cache.
+	 * 
+	 * @param sorteioTO
+	 * @return
+	 */
 	ResponseTO getSingleResultCached(RaffleTO sorteioTO);
 
 	ResponseTO getMostRepeatedNumbers(Map<String, Object> params);
@@ -29,6 +48,13 @@ public interface LoteriasService {
 	 */
 	String getUrl(String tipoJogo, Integer numeroSorteio) throws BusException;
 
+	/**
+	 * Gera um sorteio baseado nos numeros mais repetidos do intervalo de tempo
+	 * 
+	 * 
+	 * @param params
+	 * @return
+	 */
 	ResponseTO generateRaffleNumbers(Map<String, Object> params);
 
 	/**
@@ -46,6 +72,16 @@ public interface LoteriasService {
 
 	ResponseTO generateRandomNumbers(Map<String, Object> params);
 
+	/**
+	 * 
+	 * 
+	 * @param params
+	 * @return
+	 */
 	ResponseTO doBet(Map<String, Object> params);
+
+	ResponseTO getChart(String game);
+
+	ResponseTO getRatioCoefficient(String game);
 
 }

@@ -45,6 +45,7 @@ public class RestServicesBean implements RestService {
 			return exchange.getBody();
 
 		} catch (RestClientException e) {
+			e.printStackTrace();
 			throw new BusException(BusExceptions.REST_SERVICE_ERROR_TEMPLATE_CLIENT, new String[] { e.getMessage() });
 		} catch (Exception e) {
 			throw new BusException(BusExceptions.REST_SERVICE_UNKNOW_ERROR, new String[] { e.getMessage() });
@@ -57,6 +58,7 @@ public class RestServicesBean implements RestService {
 		return this.doSimpleGet(url, new HttpHeaders());
 	}
 
+	@Deprecated
 	@Override
 	public String doSimpleGetToLotteries(String url) throws BusException {
 		return this.doSimpleGet(url, defaulHeadersToLotteries());

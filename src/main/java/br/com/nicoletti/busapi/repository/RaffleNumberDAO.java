@@ -1,4 +1,4 @@
-package br.com.nicoletti.busapi.beans.repository;
+package br.com.nicoletti.busapi.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

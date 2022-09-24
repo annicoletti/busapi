@@ -46,16 +46,19 @@ public enum LotteryTypeGame {
 		return numbersToRuffle;
 	}
 
-	public static LotteryTypeGame toEnum(String typeGame) throws BusException {
-		if (typeGame != null && !typeGame.isBlank()) {
-			for (LotteryTypeGame itemEnum : LotteryTypeGame.values()) {
-				if (itemEnum.getName().equals(typeGame) || itemEnum.getAlternative().equals(typeGame)) {
-					return itemEnum;
+	public static LotteryTypeGame toEnum(Object obj) throws BusException {
+		if (obj instanceof String) {
+			String typeGame = (String) obj;
+			if (typeGame != null && !typeGame.isEmpty()) {
+				for (LotteryTypeGame itemEnum : LotteryTypeGame.values()) {
+					if (itemEnum.getName().equals(typeGame) || itemEnum.getAlternative().equals(typeGame)) {
+						return itemEnum;
+					}
 				}
 			}
 		}
 
-		throw new BusException(BusExceptions.LOTTERY_SERVICE_TYPE_GAME_IS_UNDEFINED, new String[] { typeGame });
+		throw new BusException(BusExceptions.LOTTERY_SERVICE_TYPE_GAME_IS_UNDEFINED, new String[] { obj.toString() });
 	}
 
 }

@@ -11,9 +11,14 @@ public abstract class GenericException extends Exception {
 
 	private String message = null;
 
+	public abstract Locale getLocale();
+
+	public abstract String getBundleName();
+
 	public GenericException(String code) {
 		super();
 		this.code = code;
+		this.initialize(null);
 	}
 
 	public GenericException(String code, Object... messageParameters) {
@@ -21,9 +26,10 @@ public abstract class GenericException extends Exception {
 		this.initialize(messageParameters.clone());
 	}
 
-	private void initialize(Object... messageParameters) {
+	private void initialize(Object[] messageParameters) {
 		String messageFromBundle = getMessageFromBundle();
-		this.message = formatMessageWithParams(messageFromBundle, messageParameters);
+		String messageWithParams = formatMessageWithParams(messageFromBundle, messageParameters);
+		this.message = prependCodeToMessage(messageWithParams);
 	}
 
 	private String formatMessageWithParams(String message, Object... messageParameters) {
@@ -37,6 +43,15 @@ public abstract class GenericException extends Exception {
 	private String getMessageFromBundle() {
 		ResourceBundle bundle = ResourceBundle.getBundle(getCustomBundleName(), getCustomLocale());
 		return bundle.getString(this.getCode());
+	}
+
+	private String prependCodeToMessage(String message) {
+		StringBuilder messageWithCode = new StringBuilder();
+		messageWithCode.append("[");
+		messageWithCode.append(this.code);
+		messageWithCode.append("] ");
+		messageWithCode.append(message);
+		return messageWithCode.toString();
 	}
 
 	public final String getCode() {
@@ -60,7 +75,4 @@ public abstract class GenericException extends Exception {
 		return locale;
 	}
 
-	public abstract Locale getLocale();
-
-	public abstract String getBundleName();
 }

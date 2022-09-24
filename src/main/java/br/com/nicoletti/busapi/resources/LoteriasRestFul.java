@@ -4,9 +4,11 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.nicoletti.busapi.beans.lottery.to.RaffleTO;
@@ -65,6 +67,20 @@ public class LoteriasRestFul {
 	@PostMapping(value = "/doBet")
 	public ResponseEntity<ResponseTO> doBet(@RequestBody Map<String, Object> params) {
 		ResponseTO out = loterias.doBet(params);
+		return ResponseEntity.ok().body(out);
+	}
+
+	// REQUISIÇÂO PARA GRAFICOS
+	@GetMapping(value = "/chart/dispersion")
+	public ResponseEntity<ResponseTO> getChartLotofacil(@RequestParam String game) {
+		ResponseTO out = loterias.getChart(game);
+		return ResponseEntity.ok().body(out);
+	}
+	
+	// COEFICIENTE DE RELAÇÂO
+	@GetMapping(value = "/chart/dispersion/d")
+	public ResponseEntity<ResponseTO> getRatioCoefficient(@RequestParam String game) {
+		ResponseTO out = loterias.getRatioCoefficient(game);
 		return ResponseEntity.ok().body(out);
 	}
 
